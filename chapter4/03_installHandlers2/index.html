@@ -1,0 +1,75 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <script>
+    function makeBrush() {
+      d3.csv( "dense.csv" ).then( function( data ) {                        
+          var svg1 = d3.select( "#brush1" ), svg2 = d3.select( "#brush2" ); //<1>
+
+          var sc1=d3.scaleLinear().domain([0,10,50])                        //<2>
+              .range(["lime","yellow","red"]);
+          var sc2=d3.scaleLinear().domain([0,10,50])
+              .range(["lime","yellow","blue"]);
+      
+          var cs1 = drawCircles( svg1, data, d=>d["A"], d=>d["B"], sc1 );   //<3>
+          var cs2 = drawCircles( svg2, data, d=>d["A"], d=>d["C"], sc2 );
+      
+          svg1.call( installHandlers2, data, cs1, cs2, sc1, sc2 );          //<4>
+      } );
+    }
+    
+    function drawCircles( svg, data, accX, accY, sc ) {
+      var color = sc(Infinity);
+      return svg.selectAll( "circle" ).data( data ).enter().append( "circle" )
+        .attr( "r", 5 ).attr( "cx", accX ).attr( "cy", accY )
+        .attr( "fill", color ).attr( "fill-opacity", 0.4 );     
+    }
+
+    function installHandlers2( svg, data, cs1, cs2, sc1, sc2 ) {
+      var cursor = svg.append( "circle" ).attr( "r", 50 )                  //<1>
+          .attr( "fill", "none" ).attr( "stroke", "black" )
+          .attr( "stroke-width", 10 ).attr( "stroke-opacity", 0.1 )
+          .attr( "visibility", "hidden" );                                 //<2>
+      
+      var hotzone = svg.append( "rect" ).attr( "cursor", "none" )          //<3>
+          .attr( "x", 50 ).attr( "y", 50 )
+          .attr( "width", 200 ).attr( "height", 200 )
+          .attr( "visibility", "hidden" ).attr( "pointer-events", "all" ) 
+
+          .on("mouseenter", function() {
+            cursor.attr("visbility", "visible")
+          })
+
+          .on("mousemove", function(){
+            var pt = d3.mouse( svg.node() );
+            cursor.attr("cx", pt[0]).attr("cy", pt[1]);
+
+            cs1.attr("fill", function(d, i) {
+              var r = Math.hypot(pt[0] - d3.select(this).attr("cx"),
+                                pt[1] - d3.select(this).attr("cy"));
+              data[i]["r"] = r;
+              return sc1(r);
+            })
+
+            cs2.attr("fill", (d, i) => sc2(data[i]["r"]))
+              .on("mouseleave", function() {
+                cursor.attr("visibility", "hidden");
+                cs1.attr("fill", sc1(Infinity));
+                cs2.attr("fill", sc2(Infinity));
+              })
+          })
+    }
+  </script>
+</head>
+
+<body onload="makeBrush()">
+  <div>
+    <svg id="brush1" width="300" height="300" style="background:lightgrey">
+    </svg>
+
+    <svg id="brush2" width="300" height="300" style="background:lightgrey">
+    </svg>
+  </div>
+</body>
+</html>

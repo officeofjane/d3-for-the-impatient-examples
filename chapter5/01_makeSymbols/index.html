@@ -1,0 +1,44 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <script>
+    function makeSymbols() {
+      var data = [ { "x":  40, "y":   0, "val": "A" },                   // <1>
+                  { "x":  80, "y":  30, "val": "A" },
+                  { "x": 120, "y": -10, "val": "B" },
+                  { "x": 160, "y":  15, "val": "A" },
+                  { "x": 200, "y":   0, "val": "C" },
+                  { "x": 240, "y":  10, "val": "B" } ];
+
+      var symMkr = d3.symbol().size(81).type( d3.symbolStar );            // <2>
+      var scY = d3.scaleLinear().domain( [-10,30] ).range( [80,40] );     // <3>
+      
+      d3.select( "#symbols" ).append( "g" )                               // <4>
+          .selectAll( "path" ).data( data ).enter().append( "path" )      // <5>
+          .attr( "d", symMkr )                                            // <6>
+          .attr( "fill", "red" )
+          .attr( "transform",                                             // <7>
+                d=>"translate(" + d["x"] + "," + scY(d["y"]) + ")" );      
+
+      var scT = d3.scaleOrdinal( d3.symbols ).domain( [ "A", "B", "C" ] );// <8>
+
+      d3.select( "#symbols" )
+          .append( "g" ).attr( "transform", "translate(300,0)" )          // <9>
+          .selectAll( "path" ).data( data ).enter().append( "path" )
+          .attr( "d", d => symMkr.type( scT(d["val"]) )() )               //<10>
+          .attr( "fill", "none" )                                         //<11>
+          .attr( "stroke", "blue" ).attr( "stroke-width", 2 )
+          .attr( "transform",                                             //<12>
+              d=>"translate(" + d["x"] + "," + scY(d["y"]) + ")" )
+    }
+  </script>
+</head>
+
+<body onload="makeSymbols()">
+  <div>
+    <svg id="symbols" width="600" height="120" style="background: lightgrey"></svg>
+  </div>
+
+</body>
+</html>

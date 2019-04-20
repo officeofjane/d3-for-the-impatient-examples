@@ -1,0 +1,32 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <script>
+    function demoSort() {
+      var data = ["Jane", "Anne", "Mary"];
+
+      var ul = d3.select("#sort");
+      ul.selectAll("li").data(data).enter().append("li").text(d => d);
+
+      // insert on mouse enter
+      var once;
+      ul.on("mouseenter", function() {
+        if (once) {return}
+        once = 1;
+        ul.insert("li", ":nth-child(2)").datum("Lucy").text("Lucy");
+        ul.insert("li", ":first-child").datum("Lisa").text("Lisa");
+      })
+
+      // sort on clicl
+      ul.on("click", function() {
+        ul.selectAll("li").sort((a, b) => (a < b ? 1 : b < a ? -1 : 0));
+      })
+    }
+  </script>
+</head>
+
+<body onload="demoSort()">
+  <div id="sort" width="500" height="350">
+</body>
+</html>

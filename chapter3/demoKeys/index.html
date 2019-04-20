@@ -1,0 +1,41 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <script>
+    function demoKeys() {
+      var ds1 = [["Mary", 1], ["Jane", 1], ["Anne", 2]];
+      var ds2 = [["Anne", 5], ["Jane", 3]];
+
+      console.log(ds1);
+
+      var scX = d3.scaleLinear().domain([0, 6]).range([50, 300]);
+      var scY = d3.scaleLinear().domain([0, 3]).range([50, 150]);
+
+      var j = -1, k = -1;
+
+      var svg = d3.select("#key");
+
+      svg.selectAll("text")
+        .data(ds1).enter().append("text")
+        .attr("x", 20).attr("y", d => scY(++j)).text(d => d[0]);
+
+      svg.selectAll("circle")
+       .data(ds1).enter().append("circle")
+       .attr("r", 5).attr("stroke", "red").attr("fill", "red")
+       .attr("cx", d => scX(d[1])).attr("cy", d => scY(++k)-5);
+
+      svg.on("click", function() {
+        var cs = svg.selectAll("circle").data(ds2, d => d[0]);
+
+        cs.transition().duration(1000).attr("cx", d => scX(d[1]));
+        cs.exit().attr("stroke", "blue").attr("fill", "blue");
+      })
+    }
+  </script>
+</head>
+
+<body onload="demoKeys()">
+  <svg id="key" width="500" height="350" style="background: lightgrey">
+</body>
+</html>

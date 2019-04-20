@@ -1,0 +1,40 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <script>
+    function makeTreemap() {
+        d3.json( "filesys.json" ).then( function(json) {
+            var sc = d3.scaleOrdinal( d3.schemeReds[8] );
+            
+            var nodes = d3.hierarchy( json, d=>d.kids ).sum( d=>d.size )     //<1>
+                .sort( (a,b) => b.height - a.height || b.value - a.value );  //<2>
+            
+            d3.treemap().size( [300,300] ).padding(5)(nodes);                //<3>
+            
+            var g = d3.select( "#treemap" ).append( "g" )
+                .attr( "transform", "translate(0,0)" );
+
+            g.selectAll( "rect" ).data( nodes.descendants() ).enter()
+                .append( "rect" )
+                .attr( "x", d=>d.x0 ).attr( "y", d=>d.y0 )
+                .attr( "width", d=>d.x1-d.x0 ).attr( "height", d=>d.y1-d.y0 ) //<4> 
+                .attr( "fill", d=>sc(d.height) ).attr( "stroke", "red" );
+
+            g.selectAll( "text" ).data( nodes.leaves() ).enter()              //<5>
+                .append( "text" )
+                .attr( "text-anchor", "middle" ).attr( "font-size", 10 )
+                .attr( "x", d=>(d.x0+d.x1)/2 ).attr( "y", d=>(d.y0+d.y1)/2+2 )
+                .text( d=>d.data.name );    
+        } );
+    }
+  </script>
+</head>
+
+<body onload="makeTreemap()">
+    <div>
+        <svg id="treemap" width="300" height="300" style="background:lightgrey"></svg>
+    </div>
+    
+</body>
+</html>
